@@ -35,12 +35,14 @@
 *.xcodeproj
 *.xcworkspace
 *.sln
+*.slnx
 *.suo
 *.opensdf
 *.sdf
 *.VC.db
 *.VC.opendb
-.vsconfig
+*.vsconfig
+*.code-workspace
 
 # Precompiled Assets
 SourceArt/**/*.png
@@ -52,6 +54,7 @@ Plugins/**/Binaries/*
 
 # Builds
 Build/*
+Builds/*
 
 # Whitelist PakBlacklist-<BuildConfiguration>.txt files
 !Build/*/
@@ -73,3 +76,10 @@ Plugins/**/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+
+# Packaged game files
+Windows/*
+
+# Tools used for demo dev
+.claude/*
+enc_temp_folder/*
