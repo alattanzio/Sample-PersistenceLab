@@ -8,7 +8,9 @@ The PersistenceUtils plugin in this project is meant to be serve as an example, 
 
 # Featured UE plugins
 Level Streaming Persistence Plugin (experimental) - available since UE 5.3 with new features incoming in UE 5.8.
+
 Instanced Actors Plugin (experimental) - available since UE 5.4 and used in shipped Epic titles.
+
 Mass Entity framework - production ready as of UE 5.2, though Mass gameplay and AI plugins remain experimental.
 
 # Useful resources
@@ -16,7 +18,9 @@ Resources to get you started with systems demonstrated in the talk.
 
 ## Incoming: The Player was Here - presentation and text version
 Presentation at Unreal Day 2026 in Belgrade, Serbia and Unreal Fest Chicago 2026. 
+
 Text version of the talk will be available right before Unreal Fest (June 17, 2026).
+
 Recording of Unreal Fest talk will likely be uploaded later in 2026.
 
 ## Incoming: Your First 60 Minutes with Instanced Actors
