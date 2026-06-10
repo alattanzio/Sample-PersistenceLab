@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "Framework/ResolvePersistableActorReferenceAction.h"
+#include "References/ResolvePersistableActorReferenceAction.h"
 
 #include "Engine/Engine.h"
 #include "Engine/World.h"
