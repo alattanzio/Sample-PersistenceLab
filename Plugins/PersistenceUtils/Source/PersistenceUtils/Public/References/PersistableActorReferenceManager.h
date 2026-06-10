@@ -29,6 +29,7 @@ class PERSISTENCEUTILS_API UPersistableActorReferenceManager : public UWorldSubs
 
 public:
 	DECLARE_DELEGATE_TwoParams(FOnRuntimeActorResolved, AActor* /*ResolvedActor*/, bool /*bSuccess*/);
+	DECLARE_DELEGATE_OneParam(FOnLevelPostRestored, ULevel* /*Level*/);
 
 	//~ USubsystem
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
@@ -65,6 +66,14 @@ public:
 	FDelegateHandle ResolveOrRegister(const FSoftObjectPath& LevelPath, FName ActorName,
 		FOnRuntimeActorResolved Callback, UObject* Lifetime = nullptr);
 
+	/**
+	 * Level-scoped sibling of ResolveOrRegister: fires Callback with the live ULevel now if that level's LSP
+	 * PostRestoreLevel has already fired, otherwise defers until it does (nullptr if the subsystem tears down first).
+	 * Lifetime is weak-captured; an invalid handle means it fired synchronously.
+	 */
+	FDelegateHandle AddOnLevelPostRestoreCallback(const FSoftObjectPath& LevelPath,
+		FOnLevelPostRestored Callback, UObject* Lifetime = nullptr);
+
 	void UnregisterResolveCallback(FDelegateHandle Handle);
 
 	/** Module-level LSP PostRestoreLevel hook calls this once for the level being finalized. */
@@ -95,7 +104,16 @@ private:
 		bool bHasLifetime = false;
 	};
 
+	struct FPendingLevelCallback
+	{
+		FDelegateHandle Handle;
+		FOnLevelPostRestored Delegate;
+		TWeakObjectPtr<UObject> Lifetime;
+		bool bHasLifetime = false;
+	};
+
 	void FirePending(const FRefKey& Key, AActor* ResolvedActor, bool bSuccess);
+	void FireLevelPending(const FSoftObjectPath& LevelPath, ULevel* Level);
 
 	// Tracks the level instance for each LevelPath that has had PostRestoreLevel fire. Matching the weak ptr
 	// against the current ResolveObject() distinguishes "post-restored and still loaded" from "was post-restored
@@ -107,4 +125,7 @@ private:
 	TMap<FRefKey, TWeakObjectPtr<AActor>> RegisteredActors;
 	TMap<FRefKey, TArray<FPendingCallback>> PendingCallbacks;
 	TMap<FDelegateHandle, FRefKey> HandleToKey;
+
+	TMap<FSoftObjectPath, TArray<FPendingLevelCallback>> PendingLevelCallbacks;
+	TMap<FDelegateHandle, FSoftObjectPath> LevelHandleToPath;
 };

@@ -82,11 +82,9 @@ void UPersistedAbilitySystemComponent::PostRestoreObject_Implementation(const TA
 	}
 
 	// PostRestoreObject runs before BeginPlay for map-placed actors, so instigators may not exist yet.
-	// Defer re-application to the owning level's LSP post-restore flush. We key the deferred callback on
-	// the OWNER's own (level, name) identity purely to borrow that timing - the resolved-actor argument
-	// is ignored; all instigator resolution happens inside ApplyAllRestoredEffects. ResolveOrRegister
-	// fires synchronously if the owner is already resolvable. Lifetime=this drops the callback if this
-	// component is destroyed first.
+	// Defer re-application until the owning level's LSP PostRestoreLevel completes - by then every actor in
+	// the level is spawned and the reference machinery can resolve instigators. Fires synchronously if the
+	// level is already post-restored. Lifetime=this drops the callback if this component is destroyed first.
 	UPersistableActorReferenceManager* PersistableReferenceManager = World->GetSubsystem<UPersistableActorReferenceManager>();
 	if (!PersistableReferenceManager)
 	{
@@ -94,18 +92,26 @@ void UPersistedAbilitySystemComponent::PostRestoreObject_Implementation(const TA
 		return;
 	}
 
-	ULevel* Level = Owner->GetLevel();
-	const FSoftObjectPath LevelPath(Level);
-	PersistableReferenceManager->ResolveOrRegister(LevelPath, Owner->GetFName(),
-		UPersistableActorReferenceManager::FOnRuntimeActorResolved::CreateUObject(this, &UPersistedAbilitySystemComponent::ApplyAllRestoredEffects), /*Lifetime*/ this);
+	const FSoftObjectPath LevelPath(Owner->GetLevel());
+	PersistableReferenceManager->AddOnLevelPostRestoreCallback(LevelPath,
+		UPersistableActorReferenceManager::FOnLevelPostRestored::CreateUObject(this, &UPersistedAbilitySystemComponent::ApplyAllRestoredEffects), /*Lifetime*/ this);
 }
 
-void UPersistedAbilitySystemComponent::ApplyAllRestoredEffects(AActor* ResolvedOwner, bool bSuccess)
+void UPersistedAbilitySystemComponent::ApplyAllRestoredEffects(ULevel* Level)
 {
 	AActor* Owner = GetOwner();
 	UWorld* World = GetWorld();
 	if (!Owner || !World)
 	{
+		return;
+	}
+
+	if (!World->HasBegunPlay())
+	{
+		// Persistent level finishes restoring before the world starts play (initial load). Since persisted instigator info can be the player pawn,
+		// defer attempting to restore GameplayEffects until the world has begun play. That makes sure that more instigators are resolvable, since
+		// the initial player pawn may not be spawned yet.
+		World->OnWorldBeginPlay.AddUObject(this, &UPersistedAbilitySystemComponent::ApplyAllRestoredEffects, Level);
 		return;
 	}
 

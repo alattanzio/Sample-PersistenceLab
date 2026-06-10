@@ -39,9 +39,19 @@ void UPersistableActorReferenceManager::Deinitialize()
 		FirePending(Key, nullptr, false);
 	}
 
+	// Same for level-scoped callbacks — fire with a null level so callers can clean up.
+	TArray<FSoftObjectPath> LevelKeys;
+	PendingLevelCallbacks.GetKeys(LevelKeys);
+	for (const FSoftObjectPath& LevelPath : LevelKeys)
+	{
+		FireLevelPending(LevelPath, nullptr);
+	}
+
 	RegisteredActors.Empty();
 	PendingCallbacks.Empty();
 	HandleToKey.Empty();
+	PendingLevelCallbacks.Empty();
+	LevelHandleToPath.Empty();
 	PostRestoredLevelInstances.Empty();
 
 	Super::Deinitialize();
@@ -173,10 +183,53 @@ FDelegateHandle UPersistableActorReferenceManager::ResolveOrRegister(const FSoft
 	return Pending.Handle;
 }
 
+FDelegateHandle UPersistableActorReferenceManager::AddOnLevelPostRestoreCallback(const FSoftObjectPath& LevelPath,
+	FOnLevelPostRestored Callback, UObject* Lifetime)
+{
+	if (LevelPath.IsNull())
+	{
+		Callback.ExecuteIfBound(nullptr);
+		return FDelegateHandle();
+	}
+
+	// Level already finalized and still loaded — fire now with the live level.
+	if (IsLevelCurrentlyPostRestored(LevelPath))
+	{
+		Callback.ExecuteIfBound(Cast<ULevel>(LevelPath.ResolveObject()));
+		return FDelegateHandle();
+	}
+
+	FPendingLevelCallback Pending;
+	Pending.Handle = FDelegateHandle(FDelegateHandle::GenerateNewHandle);
+	Pending.Delegate = MoveTemp(Callback);
+	Pending.Lifetime = Lifetime;
+	Pending.bHasLifetime = Lifetime != nullptr;
+
+	PendingLevelCallbacks.FindOrAdd(LevelPath).Add(Pending);
+	LevelHandleToPath.Add(Pending.Handle, LevelPath);
+	return Pending.Handle;
+}
+
 void UPersistableActorReferenceManager::UnregisterResolveCallback(FDelegateHandle Handle)
 {
 	if (!Handle.IsValid())
 	{
+		return;
+	}
+
+	// Level-scoped callbacks live in a separate registry.
+	if (const FSoftObjectPath* LevelPathPtr = LevelHandleToPath.Find(Handle))
+	{
+		const FSoftObjectPath LevelPath = *LevelPathPtr;
+		LevelHandleToPath.Remove(Handle);
+		if (TArray<FPendingLevelCallback>* List = PendingLevelCallbacks.Find(LevelPath))
+		{
+			List->RemoveAll([Handle](const FPendingLevelCallback& C) { return C.Handle == Handle; });
+			if (List->IsEmpty())
+			{
+				PendingLevelCallbacks.Remove(LevelPath);
+			}
+		}
 		return;
 	}
 
@@ -222,6 +275,27 @@ void UPersistableActorReferenceManager::OnLevelPostRestore(const ULevel* Level)
 	{
 		AActor* Resolved = GetPersistedRuntimeActor(Key.LevelPath, Key.ActorName);
 		FirePending(Key, Resolved, Resolved != nullptr);
+	}
+
+	FireLevelPending(LevelPath, const_cast<ULevel*>(Level));
+}
+
+void UPersistableActorReferenceManager::FireLevelPending(const FSoftObjectPath& LevelPath, ULevel* Level)
+{
+	TArray<FPendingLevelCallback> Callbacks;
+	if (!PendingLevelCallbacks.RemoveAndCopyValue(LevelPath, Callbacks))
+	{
+		return;
+	}
+
+	for (FPendingLevelCallback& Cb : Callbacks)
+	{
+		LevelHandleToPath.Remove(Cb.Handle);
+		if (Cb.bHasLifetime && !Cb.Lifetime.IsValid())
+		{
+			continue;
+		}
+		Cb.Delegate.ExecuteIfBound(Level);
 	}
 }
 

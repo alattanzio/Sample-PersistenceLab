@@ -10,6 +10,7 @@
 #include "PersistedAbilitySystemComponent.generated.h"
 
 class UGameplayEffect;
+class ULevel;
 
 /**
  * A single active GameplayEffect captured for persistence. This is a lossy snapshot: it records the
@@ -89,10 +90,10 @@ public:
 
 protected:
 	/** Snapshot of persistable active effects. Written by PrePersistObject, serialized by LSP, consumed by PostRestoreObject. */
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 	FPersistedAbilitySystemState PersistedState;
 
 private:
-	/** Deferred callback fired at the owning level's LSP post-restore flush; re-applies every entry in PersistedState. */
-	void ApplyAllRestoredEffects(AActor* ResolvedOwner, bool bSuccess);
+	/** Deferred callback fired once the owning level's LSP PostRestoreLevel completes; re-applies every entry in PersistedState. */
+	void ApplyAllRestoredEffects(ULevel* Level);
 };
