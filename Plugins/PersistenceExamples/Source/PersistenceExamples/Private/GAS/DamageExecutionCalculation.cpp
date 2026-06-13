@@ -15,15 +15,12 @@ void UDamageExecutionCalculation::Execute_Implementation(const FGameplayEffectCu
 {
 	Super::Execute_Implementation(ExecutionParams, OutExecutionOutput);
 
-	const float DamageValue = ExecutionParams.GetOwningSpec().GetSetByCallerMagnitude(
-		Tag_Abilities_Parameters_Damage, /*WarnIfNotFound=*/true, /*DefaultIfNotFound=*/0.0f);
+	const float DamageValue = ExecutionParams.GetOwningSpec().GetSetByCallerMagnitude(Tag_Abilities_Parameters_Damage, /*WarnIfNotFound=*/true, /*DefaultIfNotFound=*/0.0f);
 
-	UE_LOG(LogPersistenceExamples, Log, TEXT("DamageExec: SetByCaller(%s) = %.2f"),
-		*Tag_Abilities_Parameters_Damage.GetTag().ToString(), DamageValue);
+	UE_LOG(LogPersistenceExamples, Verbose, TEXT("DamageExec: SetByCaller(%s) = %.2f"), *Tag_Abilities_Parameters_Damage.GetTag().ToString(), DamageValue);
 
 	if (DamageValue > 0.0f)
 	{
-		OutExecutionOutput.AddOutputModifier(FGameplayModifierEvaluatedData(
-			UHealthAttributeSet::GetDamageAttribute(), EGameplayModOp::Additive, DamageValue));
+		OutExecutionOutput.AddOutputModifier(FGameplayModifierEvaluatedData(UHealthAttributeSet::GetDamageAttribute(), EGameplayModOp::Additive, DamageValue));
 	}
 }

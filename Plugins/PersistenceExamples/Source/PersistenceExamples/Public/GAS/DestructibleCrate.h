@@ -7,9 +7,9 @@
 #include "GameFramework/Actor.h"
 #include "DestructibleCrate.generated.h"
 
-class UAbilitySystemComponent;
 class UHealthAttributeSet;
 class UPersistedGeometryCollectionComponent;
+class UPersistedAbilitySystemComponent;
 
 /**
  * Actor base for the destructible-crate demo. Owns an ASC + UHealthAttributeSet. LSP persists
@@ -33,7 +33,7 @@ public:
 	TObjectPtr<UPersistedGeometryCollectionComponent> GeometryCollection;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="GAS")
-	TObjectPtr<UAbilitySystemComponent> AbilitySystemComp;
+	TObjectPtr<UPersistedAbilitySystemComponent> AbilitySystemComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="GAS")
 	TObjectPtr<UHealthAttributeSet> HealthSet;
