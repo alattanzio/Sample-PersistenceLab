@@ -1,9 +1,9 @@
 {
 	"FileVersion": 3,
 	"Version": 1,
-	"VersionName": "1.0",
+	"VersionName": "0.1",
 	"FriendlyName": "PersistenceUtils",
-	"Description": "Utilities serializing multiple World Partition map states to SaveGame files. Last map and player location can be stored and reloaded. Contains actor, instanced actor, and Mass examples.",
+	"Description": "Utilities serializing map states to SaveGame files. Contains actor, instanced actor, and Mass serialization functionality.",
 	"Category": "Other",
 	"CreatedBy": "Zhi Kang Shao (Epic Games)",
 	"CreatedByURL": "",
