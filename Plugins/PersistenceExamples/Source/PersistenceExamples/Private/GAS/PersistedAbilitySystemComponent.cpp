@@ -30,7 +30,7 @@ void UPersistedAbilitySystemComponent::PrePersistObject_Implementation()
 	// Query active effects whose own (asset) tags include the persistable tag, rather than walking all
 	// effects and filtering by hand.
 	FGameplayTagContainer TagFilter;
-	TagFilter.AddTag(GetPersistableEffectTag());
+	TagFilter.AddTag(GetPersistableEffectTag()); // Opt-in GEs: Gameplay.Effect.Persistable asset tag
 	const FGameplayEffectQuery Query = FGameplayEffectQuery::MakeQuery_MatchAnyEffectTags(TagFilter);
 
 	for (const FActiveGameplayEffectHandle& Handle : GetActiveEffects(Query))
