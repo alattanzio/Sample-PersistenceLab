@@ -26,8 +26,7 @@ public class PersistenceUtils : ModuleRules
 			new string[]
 			{
 				"Core",
-				"MassEntity",    // FMassEntityHandle and FMassArchetypeHandle are exposed in MassPersistenceUtils.h
-				"MassCore"
+				"MassEntity", "MassSpawner",    // FMassEntityHandle and FMassArchetypeHandle are exposed in MassPersistenceUtils.h
             }
 			);
 			
@@ -46,8 +45,7 @@ public class PersistenceUtils : ModuleRules
 				"MassActors",
 				"MassSpawner",
 				"MassSimulation",
-				"MassCore",
-				"GameplayDebugger"
+				"GameplayDebugger",
 				// ... add private dependencies that you statically link with here ...
 			}
 			);

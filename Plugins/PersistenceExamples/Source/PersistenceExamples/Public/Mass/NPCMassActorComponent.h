@@ -3,9 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "MassEntityHandle.h"
+#include "NPCMassFragments.h"
 #include "Components/ActorComponent.h"
-#include "Mass/EntityHandle.h"
-#include "Mass/NPCMassFragments.h"
 #include "NPCMassActorComponent.generated.h"
 
 class UHealthAttributeSet;

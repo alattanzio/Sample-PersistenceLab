@@ -42,7 +42,6 @@ public class PersistenceExamples : ModuleRules
 				"MassActors",
 				"MassSpawner",
 				"MassSimulation",
-                "MassCore",
 				// Mass StateTree integration (NPCNavTargetEvaluator)
 				"StateTreeModule",
 				"MassAIBehavior",

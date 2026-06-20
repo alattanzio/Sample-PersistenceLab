@@ -3,9 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Mass/EntityElementTypes.h"
-#include "Mass/ExternalSubsystemTraits.h"
+#include "MassEntityElementTypes.h"
 #include "MassEntityTraitBase.h"
+#include "MassEntityTypes.h"
 #include "PersistableEntityConfigTrait.generated.h"
 
 class UMassEntityConfigAsset;

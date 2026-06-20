@@ -1,7 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "PersistenceUtilsSettings.h"
-#include "Mass/EntityElementTypes.h"
+#include "MassEntityTypes.h"
 #include "UObject/UObjectIterator.h"
 
 TArray<FString> UPersistenceUtilsSettings::GetMassFragmentOptions() const
